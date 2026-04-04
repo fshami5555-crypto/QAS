@@ -2,141 +2,133 @@ import express from "express";
 import { createServer as createViteServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
-import Database from "better-sqlite3";
+import { neon } from "@netlify/neon";
 import fs from "fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const db = new Database("qistati.db");
-
 // Initialize database
-db.exec(`
-  CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT UNIQUE,
-    password TEXT,
-    name TEXT,
-    phone TEXT,
-    national_id TEXT,
-    role TEXT, -- 'admin', 'merchant', 'customer', 'financier'
-    status TEXT DEFAULT 'active'
-  );
+const sql = neon(process.env.NETLIFY_DATABASE_URL!);
 
-  CREATE TABLE IF NOT EXISTS products (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    merchant_id INTEGER,
-    name TEXT,
-    description TEXT,
-    original_price REAL,
-    image_url TEXT,
-    FOREIGN KEY(merchant_id) REFERENCES users(id)
-  );
+async function initDb() {
+  try {
+    await sql`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        email TEXT UNIQUE,
+        password TEXT,
+        name TEXT,
+        phone TEXT,
+        national_id TEXT,
+        role TEXT, -- 'admin', 'merchant', 'customer', 'financier'
+        status TEXT DEFAULT 'active'
+      );
+    `;
 
-  CREATE TABLE IF NOT EXISTS orders (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    customer_id INTEGER,
-    merchant_id INTEGER,
-    financier_id INTEGER,
-    status TEXT DEFAULT 'pending', -- 'pending', 'approved', 'rejected', 'modification_requested'
-    total_price REAL,
-    installment_plan INTEGER, -- 6 or 12
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY(customer_id) REFERENCES users(id),
-    FOREIGN KEY(merchant_id) REFERENCES users(id),
-    FOREIGN KEY(financier_id) REFERENCES users(id)
-  );
+    await sql`
+      CREATE TABLE IF NOT EXISTS products (
+        id SERIAL PRIMARY KEY,
+        merchant_id INTEGER REFERENCES users(id),
+        name TEXT,
+        description TEXT,
+        original_price REAL,
+        image_url TEXT
+      );
+    `;
 
-  CREATE TABLE IF NOT EXISTS order_items (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    order_id INTEGER,
-    product_id INTEGER,
-    price REAL,
-    FOREIGN KEY(order_id) REFERENCES orders(id),
-    FOREIGN KEY(product_id) REFERENCES products(id)
-  );
+    await sql`
+      CREATE TABLE IF NOT EXISTS orders (
+        id SERIAL PRIMARY KEY,
+        customer_id INTEGER REFERENCES users(id),
+        merchant_id INTEGER REFERENCES users(id),
+        financier_id INTEGER REFERENCES users(id),
+        status TEXT DEFAULT 'pending', -- 'pending', 'approved', 'rejected', 'modification_requested'
+        total_price REAL,
+        installment_plan INTEGER, -- 6 or 12
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
 
-  CREATE TABLE IF NOT EXISTS order_documents (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    order_id INTEGER,
-    type TEXT, -- 'id_front', 'id_back', 'social_security', 'salary_slip'
-    file_path TEXT,
-    FOREIGN KEY(order_id) REFERENCES orders(id)
-  );
+    await sql`
+      CREATE TABLE IF NOT EXISTS order_items (
+        id SERIAL PRIMARY KEY,
+        order_id INTEGER REFERENCES orders(id),
+        product_id INTEGER REFERENCES products(id),
+        price REAL
+      );
+    `;
 
-  CREATE TABLE IF NOT EXISTS settings (
-    key TEXT PRIMARY KEY,
-    value TEXT
-  );
-`);
+    await sql`
+      CREATE TABLE IF NOT EXISTS order_documents (
+        id SERIAL PRIMARY KEY,
+        order_id INTEGER REFERENCES orders(id),
+        type TEXT, -- 'id_front', 'id_back', 'social_security', 'salary_slip'
+        file_path TEXT
+      );
+    `;
 
-// Migration: Ensure columns exist in users table
-const columns = db.prepare("PRAGMA table_info(users)").all() as any[];
-const columnNames = columns.map(c => c.name);
-if (!columnNames.includes("phone")) {
-  console.log("Adding 'phone' column to users table...");
-  db.prepare("ALTER TABLE users ADD COLUMN phone TEXT").run();
-}
-if (!columnNames.includes("national_id")) {
-  console.log("Adding 'national_id' column to users table...");
-  db.prepare("ALTER TABLE users ADD COLUMN national_id TEXT").run();
-}
+    await sql`
+      CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT
+      );
+    `;
 
-// Seed some data
-const seedUsers = [
-  { email: "admin@qistati.com", password: "admin123", name: "Super Admin", role: "admin" },
-  { email: "merchant@test.com", password: "pass123", name: "Electronics Store", role: "merchant" },
-  { email: "financier@test.com", password: "pass123", name: "Quick Finance Co", role: "financier" },
-  { email: "customer@test.com", password: "pass123", name: "Ahmad Ali", role: "customer" }
-];
+    // Seed some data
+    const seedUsers = [
+      { email: "admin@qistati.com", password: "admin123", name: "Super Admin", role: "admin" },
+      { email: "merchant@test.com", password: "pass123", name: "Electronics Store", role: "merchant" },
+      { email: "financier@test.com", password: "pass123", name: "Quick Finance Co", role: "financier" },
+      { email: "customer@test.com", password: "pass123", name: "Ahmad Ali", role: "customer" }
+    ];
 
-for (const u of seedUsers) {
-  const result = db.prepare("INSERT OR IGNORE INTO users (email, password, name, role) VALUES (?, ?, ?, ?)").run(u.email, u.password, u.name, u.role);
-  if (result.changes > 0) {
-    console.log(`Seeded user: ${u.email}`);
+    for (const u of seedUsers) {
+      await sql`
+        INSERT INTO users (email, password, name, role) 
+        VALUES (${u.email}, ${u.password}, ${u.name}, ${u.role})
+        ON CONFLICT (email) DO NOTHING
+      `;
+    }
+
+    const products = await sql`SELECT COUNT(*) as count FROM products`;
+    if (parseInt(products[0].count) === 0) {
+      const merchants = await sql`SELECT id FROM users WHERE role = 'merchant' LIMIT 1`;
+      if (merchants.length > 0) {
+        const merchantId = merchants[0].id;
+        await sql`
+          INSERT INTO products (merchant_id, name, description, original_price, image_url) 
+          VALUES (${merchantId}, 'iPhone 15 Pro', 'Latest Apple iPhone with Titanium design.', 999, 'https://picsum.photos/seed/iphone/400/400')
+        `;
+        await sql`
+          INSERT INTO products (merchant_id, name, description, original_price, image_url) 
+          VALUES (${merchantId}, 'MacBook Air M2', 'Supercharged by M2 chip.', 1199, 'https://picsum.photos/seed/macbook/400/400')
+        `;
+      }
+    }
+
+    await sql`INSERT INTO settings (key, value) VALUES ('site_name', 'قسطني') ON CONFLICT (key) DO NOTHING`;
+    await sql`INSERT INTO settings (key, value) VALUES ('site_logo', 'https://i.ibb.co/pjybBgHC/logo.png') ON CONFLICT (key) DO NOTHING`;
+
+    console.log("Database initialization and seeding complete.");
+  } catch (error) {
+    console.error("Database initialization failed:", error);
   }
 }
-
-const productCount = db.prepare("SELECT COUNT(*) as count FROM products").get() as { count: number };
-if (productCount.count === 0) {
-  const merchant = db.prepare("SELECT id FROM users WHERE role = 'merchant' LIMIT 1").get() as any;
-  if (merchant) {
-    console.log(`Seeding products for merchant ID: ${merchant.id}`);
-    db.prepare("INSERT INTO products (merchant_id, name, description, original_price, image_url) VALUES (?, ?, ?, ?, ?)").run(
-      merchant.id,
-      "iPhone 15 Pro",
-      "Latest Apple iPhone with Titanium design.",
-      999,
-      "https://picsum.photos/seed/iphone/400/400"
-    );
-    db.prepare("INSERT INTO products (merchant_id, name, description, original_price, image_url) VALUES (?, ?, ?, ?, ?)").run(
-      merchant.id,
-      "MacBook Air M2",
-      "Supercharged by M2 chip.",
-      1199,
-      "https://picsum.photos/seed/macbook/400/400"
-    );
-  } else {
-    console.warn("No merchant found to seed products.");
-  }
-}
-
-db.prepare("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)").run("site_name", "قسطني");
-db.prepare("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)").run("site_logo", "https://i.ibb.co/pjybBgHC/logo.png");
-
-console.log("Database initialization and seeding complete.");
 
 async function startServer() {
+  await initDb();
   const app = express();
   app.use(express.json());
 
   // API Routes
-  app.post("/api/login", (req, res) => {
+  app.post("/api/login", async (req, res) => {
     const { email, password } = req.body;
     console.log(`Login attempt: ${email}`);
     try {
-      const user = db.prepare("SELECT * FROM users WHERE email = ? AND password = ?").get(email, password) as any;
-      if (user) {
+      const users = await sql`SELECT * FROM users WHERE email = ${email} AND password = ${password}`;
+      if (users.length > 0) {
+        const user = users[0];
         console.log(`Login success: ${email} (Role: ${user.role})`);
         const { password: _, ...userWithoutPassword } = user;
         res.json(userWithoutPassword);
@@ -150,20 +142,22 @@ async function startServer() {
     }
   });
 
-  app.post("/api/register", (req, res) => {
+  app.post("/api/register", async (req, res) => {
     const { email, password, name, phone, national_id, role = 'customer' } = req.body;
     console.log(`Registration attempt: ${email}`);
     try {
-      const result = db.prepare("INSERT INTO users (email, password, name, phone, national_id, role) VALUES (?, ?, ?, ?, ?, ?)").run(
-        email, password, name, phone, national_id, role
-      );
-      console.log(`Registration success: ${email} (ID: ${result.lastInsertRowid})`);
-      const user = db.prepare("SELECT * FROM users WHERE id = ?").get(result.lastInsertRowid) as any;
+      const users = await sql`
+        INSERT INTO users (email, password, name, phone, national_id, role) 
+        VALUES (${email}, ${password}, ${name}, ${phone}, ${national_id}, ${role})
+        RETURNING *
+      `;
+      const user = users[0];
+      console.log(`Registration success: ${email} (ID: ${user.id})`);
       const { password: _, ...userWithoutPassword } = user;
       res.json(userWithoutPassword);
     } catch (error: any) {
       console.error(`Registration error for ${email}:`, error);
-      if (error.code === 'SQLITE_CONSTRAINT') {
+      if (error.code === '23505') { // Postgres unique constraint violation
         res.status(400).json({ error: "البريد الإلكتروني مسجل مسبقاً" });
       } else {
         res.status(500).json({ error: "حدث خطأ أثناء التسجيل. يرجى المحاولة لاحقاً." });
@@ -171,9 +165,9 @@ async function startServer() {
     }
   });
 
-  app.get("/api/products", (req, res) => {
+  app.get("/api/products", async (req, res) => {
     try {
-      const products = db.prepare("SELECT * FROM products").all();
+      const products = await sql`SELECT * FROM products`;
       console.log(`Fetched ${products.length} products`);
       res.json(products);
     } catch (error) {
@@ -182,85 +176,125 @@ async function startServer() {
     }
   });
 
-  app.post("/api/products", (req, res) => {
+  app.post("/api/products", async (req, res) => {
     const { merchant_id, name, description, original_price, image_url } = req.body;
-    const result = db.prepare("INSERT INTO products (merchant_id, name, description, original_price, image_url) VALUES (?, ?, ?, ?, ?)").run(
-      merchant_id, name, description, original_price, image_url
-    );
-    res.json({ id: result.lastInsertRowid });
+    try {
+      const products = await sql`
+        INSERT INTO products (merchant_id, name, description, original_price, image_url) 
+        VALUES (${merchant_id}, ${name}, ${description}, ${original_price}, ${image_url})
+        RETURNING id
+      `;
+      res.json({ id: products[0].id });
+    } catch (error) {
+      res.status(500).json({ error: "Error adding product" });
+    }
   });
 
-  app.get("/api/orders", (req, res) => {
+  app.get("/api/orders", async (req, res) => {
     const { role, userId } = req.query;
-    let orders;
-    if (role === 'customer') {
-      orders = db.prepare("SELECT * FROM orders WHERE customer_id = ?").all(userId);
-    } else if (role === 'merchant') {
-      orders = db.prepare("SELECT * FROM orders WHERE merchant_id = ?").all(userId);
-    } else if (role === 'financier') {
-      orders = db.prepare("SELECT * FROM orders").all();
-    } else {
-      orders = db.prepare("SELECT * FROM orders").all();
-    }
-    res.json(orders);
-  });
-
-  app.post("/api/orders", (req, res) => {
-    const { customer_id, merchant_id, items, total_price, installment_plan, documents } = req.body;
-    const financier = db.prepare("SELECT id FROM users WHERE role = 'financier' LIMIT 1").get() as any;
-    
-    const result = db.prepare("INSERT INTO orders (customer_id, merchant_id, financier_id, total_price, installment_plan) VALUES (?, ?, ?, ?, ?)").run(
-      customer_id, merchant_id, financier.id, total_price, installment_plan
-    );
-    const orderId = result.lastInsertRowid;
-
-    for (const item of items) {
-      db.prepare("INSERT INTO order_items (order_id, product_id, price) VALUES (?, ?, ?)").run(orderId, item.id, item.price);
-    }
-
-    if (documents) {
-      for (const [type, path] of Object.entries(documents)) {
-        db.prepare("INSERT INTO order_documents (order_id, type, file_path) VALUES (?, ?, ?)").run(orderId, type, path);
+    try {
+      let orders;
+      if (role === 'customer') {
+        orders = await sql`SELECT * FROM orders WHERE customer_id = ${userId}`;
+      } else if (role === 'merchant') {
+        orders = await sql`SELECT * FROM orders WHERE merchant_id = ${userId}`;
+      } else {
+        orders = await sql`SELECT * FROM orders`;
       }
+      res.json(orders);
+    } catch (error) {
+      res.status(500).json({ error: "Error fetching orders" });
     }
-
-    res.json({ id: orderId });
   });
 
-  app.patch("/api/orders/:id", (req, res) => {
+  app.post("/api/orders", async (req, res) => {
+    const { customer_id, merchant_id, items, total_price, installment_plan, documents } = req.body;
+    try {
+      const financiers = await sql`SELECT id FROM users WHERE role = 'financier' LIMIT 1`;
+      const financierId = financiers[0]?.id;
+      
+      const orders = await sql`
+        INSERT INTO orders (customer_id, merchant_id, financier_id, total_price, installment_plan) 
+        VALUES (${customer_id}, ${merchant_id}, ${financierId}, ${total_price}, ${installment_plan})
+        RETURNING id
+      `;
+      const orderId = orders[0].id;
+
+      for (const item of items) {
+        await sql`INSERT INTO order_items (order_id, product_id, price) VALUES (${orderId}, ${item.id}, ${item.price})`;
+      }
+
+      if (documents) {
+        for (const [type, path] of Object.entries(documents)) {
+          await sql`INSERT INTO order_documents (order_id, type, file_path) VALUES (${orderId}, ${type}, ${path})`;
+        }
+      }
+
+      res.json({ id: orderId });
+    } catch (error) {
+      console.error("Error creating order:", error);
+      res.status(500).json({ error: "Error creating order" });
+    }
+  });
+
+  app.patch("/api/orders/:id", async (req, res) => {
     const { status } = req.body;
-    db.prepare("UPDATE orders SET status = ? WHERE id = ?").run(status, req.params.id);
-    res.json({ success: true });
+    try {
+      await sql`UPDATE orders SET status = ${status} WHERE id = ${req.params.id}`;
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Error updating order" });
+    }
   });
 
   // Admin Settings
-  app.get("/api/settings", (req, res) => {
-    const settings = db.prepare("SELECT * FROM settings").all() as any[];
-    const settingsMap = settings.reduce((acc, curr) => ({ ...acc, [curr.key]: curr.value }), {});
-    res.json(settingsMap);
+  app.get("/api/settings", async (req, res) => {
+    try {
+      const settings = await sql`SELECT * FROM settings`;
+      const settingsMap = settings.reduce((acc: any, curr: any) => ({ ...acc, [curr.key]: curr.value }), {});
+      res.json(settingsMap);
+    } catch (error) {
+      res.status(500).json({ error: "Error fetching settings" });
+    }
   });
 
-  app.post("/api/settings", (req, res) => {
+  app.post("/api/settings", async (req, res) => {
     const { site_name, site_logo } = req.body;
-    if (site_name) db.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)").run("site_name", site_name);
-    if (site_logo) db.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)").run("site_logo", site_logo);
-    res.json({ success: true });
+    try {
+      if (site_name) await sql`INSERT INTO settings (key, value) VALUES ('site_name', ${site_name}) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`;
+      if (site_logo) await sql`INSERT INTO settings (key, value) VALUES ('site_logo', ${site_logo}) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`;
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Error updating settings" });
+    }
   });
 
   // Admin User Management
-  app.get("/api/users", (req, res) => {
-    const users = db.prepare("SELECT id, email, name, role, status FROM users").all();
-    res.json(users);
+  app.get("/api/users", async (req, res) => {
+    try {
+      const users = await sql`SELECT id, email, name, role, status FROM users`;
+      res.json(users);
+    } catch (error) {
+      res.status(500).json({ error: "Error fetching users" });
+    }
   });
 
-  app.delete("/api/users/:id", (req, res) => {
-    db.prepare("DELETE FROM users WHERE id = ?").run(req.params.id);
-    res.json({ success: true });
+  app.delete("/api/users/:id", async (req, res) => {
+    try {
+      await sql`DELETE FROM users WHERE id = ${req.params.id}`;
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Error deleting user" });
+    }
   });
 
-  app.delete("/api/products/:id", (req, res) => {
-    db.prepare("DELETE FROM products WHERE id = ?").run(req.params.id);
-    res.json({ success: true });
+  app.delete("/api/products/:id", async (req, res) => {
+    try {
+      await sql`DELETE FROM products WHERE id = ${req.params.id}`;
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Error deleting product" });
+    }
   });
 
   // Vite middleware for development
