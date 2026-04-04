@@ -680,6 +680,18 @@ export default function App() {
   useEffect(() => {
     fetchProducts();
     fetchSettings();
+    const checkHealth = async () => {
+      try {
+        const res = await fetch('/api/health');
+        if (!res.ok) {
+          const data = await res.json();
+          console.error("Database health check failed:", data);
+        }
+      } catch (error) {
+        console.error("Server health check failed:", error);
+      }
+    };
+    checkHealth();
   }, []);
 
   const fetchSettings = async () => {
@@ -730,19 +742,27 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(loginForm)
       });
-      const data = await res.json();
-      if (res.ok) {
-        setUser(data);
-        setIsLoginModalOpen(false);
-        if (pendingCheckout) {
-          handleCheckout(pendingCheckout.plan, data);
+      
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.indexOf("application/json") !== -1) {
+        const data = await res.json();
+        if (res.ok) {
+          setUser(data);
+          setIsLoginModalOpen(false);
+          if (pendingCheckout) {
+            handleCheckout(pendingCheckout.plan, data);
+          }
+        } else {
+          alert(data.error || 'خطأ في بيانات الدخول');
         }
       } else {
-        alert(data.error || 'خطأ في بيانات الدخول');
+        const text = await res.text();
+        console.error("Non-JSON response:", text);
+        alert("حدث خطأ في الخادم (استجابة غير صالحة). يرجى التأكد من إعدادات NETLIFY_DATABASE_URL.");
       }
     } catch (error) {
       console.error("Login error:", error);
-      alert('حدث خطأ أثناء الاتصال بالخادم');
+      alert('حدث خطأ أثناء الاتصال بالخادم. يرجى التأكد من تشغيل الخادم وإعدادات NETLIFY_DATABASE_URL.');
     }
   };
 

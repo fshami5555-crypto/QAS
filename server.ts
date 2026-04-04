@@ -146,7 +146,22 @@ async function startServer() {
   app.use(express.json());
 
   // API Routes
+  app.get("/api/health", async (req, res) => {
+    if (!dbUrl) {
+      return res.status(500).json({ status: "error", database: "missing_url", error: "NETLIFY_DATABASE_URL is not defined" });
+    }
+    try {
+      await sql`SELECT 1`;
+      res.json({ status: "ok", database: "connected" });
+    } catch (error) {
+      res.status(500).json({ status: "error", database: "disconnected", error: String(error) });
+    }
+  });
+
   app.post("/api/login", async (req, res) => {
+    if (!dbUrl) {
+      return res.status(500).json({ error: "إعدادات قاعدة البيانات مفقودة (NETLIFY_DATABASE_URL)" });
+    }
     const { email, password } = req.body;
     console.log(`Login attempt: ${email}`);
     try {
