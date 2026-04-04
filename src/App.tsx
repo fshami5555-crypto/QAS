@@ -57,32 +57,35 @@ const TOTAL_MARKUP = COMMISSION_RATE + INTEREST_RATE;
 // --- Components ---
 
 const Navbar = ({ user, onLogout, cartCount, onOpenCart, onLoginClick }: { user: User | null, onLogout: () => void, cartCount: number, onOpenCart: () => void, onLoginClick: () => void }) => (
-  <nav className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
+  <nav className="bg-white/90 backdrop-blur-md border-b border-slate-100 sticky top-0 z-50">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex justify-between h-20 items-center">
         <motion.div 
-          whileHover={{ scale: 1.05 }}
+          whileHover={{ scale: 1.02 }}
           className="flex items-center gap-3 group cursor-pointer"
         >
-          <div className="relative">
-            <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-xl shadow-indigo-200 group-hover:rotate-12 transition-transform">
-              ق
-            </div>
-            <div className="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-2 border-white shadow-sm" />
-          </div>
+          <img 
+            src="https://i.ibb.co/pjybBgHC/logo.png" 
+            alt="Qistni Logo" 
+            className="h-12 w-auto object-contain"
+            onError={(e) => {
+              // Fallback if direct link fails
+              e.currentTarget.src = "https://i.ibb.co/vX8Yyv0/qistni-placeholder.png";
+            }}
+          />
           <div className="flex flex-col leading-none">
-            <span className="text-2xl font-black text-slate-900 tracking-tight">قسطني</span>
-            <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">Qistni</span>
+            <span className="text-2xl font-black text-blue-900 tracking-tight">قسطني</span>
+            <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Qistni</span>
           </div>
         </motion.div>
         
         <div className="flex items-center gap-4">
           {user ? (
             <>
-              <div className="hidden md:flex items-center gap-2 text-slate-600 ml-4 bg-slate-100 px-4 py-2 rounded-full">
-                <User size={18} className="text-indigo-600" />
+              <div className="hidden md:flex items-center gap-2 text-slate-600 ml-4 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-100">
+                <User size={18} className="text-blue-600" />
                 <span className="text-sm font-bold">{user.name}</span>
-                <span className="text-[10px] bg-indigo-600 text-white px-2 py-0.5 rounded-full">
+                <span className="text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded-full">
                   {user.role === 'customer' ? 'عميل' : user.role === 'merchant' ? 'تاجر' : user.role === 'financier' ? 'شركة تمويل' : 'مدير'}
                 </span>
               </div>
@@ -91,14 +94,14 @@ const Navbar = ({ user, onLogout, cartCount, onOpenCart, onLoginClick }: { user:
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={onOpenCart}
-                  className="relative p-3 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 rounded-2xl transition-colors"
+                  className="relative p-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 rounded-2xl transition-colors"
                 >
                   <ShoppingCart size={24} />
                   {cartCount > 0 && (
                     <motion.span 
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      className="absolute top-1 right-1 bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full ring-2 ring-white"
+                      className="absolute top-1 right-1 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full ring-2 ring-white"
                     >
                       {cartCount}
                     </motion.span>
@@ -119,7 +122,7 @@ const Navbar = ({ user, onLogout, cartCount, onOpenCart, onLoginClick }: { user:
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={onLoginClick}
-              className="bg-indigo-600 text-white px-8 py-3 rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20"
+              className="bg-blue-700 text-white px-8 py-3 rounded-2xl font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-700/20"
             >
               تسجيل الدخول
             </motion.button>
@@ -156,7 +159,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
           referrerPolicy="no-referrer"
         />
-        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full text-xs font-black text-indigo-600 shadow-lg">
+        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full text-xs font-black text-blue-600 shadow-lg">
           تقسيط ميسر
         </div>
       </div>
@@ -165,13 +168,13 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
         <p className="text-slate-500 text-sm mb-6 line-clamp-2 leading-relaxed">{product.description}</p>
         
         <div className="grid grid-cols-2 gap-3 mb-8">
-          <div className="bg-indigo-50 p-3 rounded-3xl text-center">
-            <span className="block text-[10px] text-indigo-400 font-bold uppercase mb-1">6 أشهر</span>
-            <span className="text-lg font-black text-indigo-700">{monthly6} <span className="text-xs">د.أ</span></span>
+          <div className="bg-blue-50 p-3 rounded-3xl text-center">
+            <span className="block text-[10px] text-blue-400 font-bold uppercase mb-1">6 أشهر</span>
+            <span className="text-lg font-black text-blue-700">{monthly6} <span className="text-xs">د.أ</span></span>
           </div>
-          <div className="bg-emerald-50 p-3 rounded-3xl text-center">
-            <span className="block text-[10px] text-emerald-400 font-bold uppercase mb-1">12 شهر</span>
-            <span className="text-lg font-black text-emerald-700">{monthly12} <span className="text-xs">د.أ</span></span>
+          <div className="bg-amber-50 p-3 rounded-3xl text-center">
+            <span className="block text-[10px] text-amber-500 font-bold uppercase mb-1">12 شهر</span>
+            <span className="text-lg font-black text-amber-700">{monthly12} <span className="text-xs">د.أ</span></span>
           </div>
         </div>
 
@@ -179,7 +182,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => onAddToCart(product)}
-          className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black hover:bg-indigo-600 transition-all flex items-center justify-center gap-3 shadow-lg shadow-slate-200"
+          className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black hover:bg-blue-700 transition-all flex items-center justify-center gap-3 shadow-lg shadow-slate-200"
         >
           <Plus size={20} />
           إضافة للسلة
@@ -208,7 +211,7 @@ const OrderStatusBadge = ({ status }: { status: Order['status'] }) => {
 };
 
 const Hero = ({ onShopNow }: { onShopNow: () => void }) => (
-  <div className="relative bg-slate-900 rounded-[3rem] overflow-hidden mb-20 shadow-2xl shadow-indigo-900/20">
+  <div className="relative bg-slate-900 rounded-[3rem] overflow-hidden mb-20 shadow-2xl shadow-blue-900/20">
     <div className="absolute inset-0 opacity-30">
       <img 
         src="https://picsum.photos/seed/finance/1920/1080?blur=1" 
@@ -219,14 +222,14 @@ const Hero = ({ onShopNow }: { onShopNow: () => void }) => (
     </div>
     
     {/* Floating Blobs */}
-    <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-600/20 blur-[100px] rounded-full -mr-48 -mt-48 animate-pulse" />
-    <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-600/10 blur-[100px] rounded-full -ml-48 -mb-48 animate-pulse" />
+    <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/20 blur-[100px] rounded-full -mr-48 -mt-48 animate-pulse" />
+    <div className="absolute bottom-0 left-0 w-96 h-96 bg-amber-600/10 blur-[100px] rounded-full -ml-48 -mb-48 animate-pulse" />
 
     <div className="relative px-10 py-24 lg:py-40 flex flex-col items-center text-center lg:items-start lg:text-right max-w-4xl mr-auto lg:mr-16">
       <motion.div
         initial={{ opacity: 0, x: 50 }}
         animate={{ opacity: 1, x: 0 }}
-        className="inline-flex items-center gap-3 bg-indigo-500/20 border border-indigo-500/30 px-6 py-2 rounded-full text-indigo-300 text-sm font-black mb-8 backdrop-blur-md"
+        className="inline-flex items-center gap-3 bg-blue-500/20 border border-blue-500/30 px-6 py-2 rounded-full text-blue-300 text-sm font-black mb-8 backdrop-blur-md"
       >
         <CreditCard size={18} />
         <span>قسط مشترياتك بكل سهولة وأمان مع قسطني</span>
@@ -239,7 +242,7 @@ const Hero = ({ onShopNow }: { onShopNow: () => void }) => (
         className="text-6xl lg:text-8xl font-black text-white mb-8 leading-[1.05] tracking-tight"
       >
         اشترِ اليوم.. <br/>
-        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-emerald-400">وادفع لاحقاً</span>
+        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-amber-400">وادفع لاحقاً</span>
       </motion.h1>
       
       <motion.p 
@@ -261,7 +264,7 @@ const Hero = ({ onShopNow }: { onShopNow: () => void }) => (
           whileHover={{ scale: 1.05, y: -5 }}
           whileTap={{ scale: 0.95 }}
           onClick={onShopNow}
-          className="bg-indigo-600 text-white px-10 py-5 rounded-[2rem] font-black text-xl hover:bg-indigo-500 transition-all shadow-2xl shadow-indigo-600/40 flex items-center gap-3"
+          className="bg-blue-700 text-white px-10 py-5 rounded-[2rem] font-black text-xl hover:bg-blue-600 transition-all shadow-2xl shadow-blue-700/40 flex items-center gap-3"
         >
           ابدأ التسوق الآن
           <ChevronRight className="rotate-180" />
@@ -281,8 +284,8 @@ const Hero = ({ onShopNow }: { onShopNow: () => void }) => (
 const HowItWorks = () => (
   <div className="py-32 border-t border-slate-200 relative overflow-hidden">
     {/* Decorative Blobs */}
-    <div className="absolute top-0 left-0 w-64 h-64 bg-indigo-100/50 blur-[80px] rounded-full -ml-32 -mt-32" />
-    <div className="absolute bottom-0 right-0 w-64 h-64 bg-emerald-100/50 blur-[80px] rounded-full -mr-32 -mb-32" />
+    <div className="absolute top-0 left-0 w-64 h-64 bg-blue-100/50 blur-[80px] rounded-full -ml-32 -mt-32" />
+    <div className="absolute bottom-0 right-0 w-64 h-64 bg-amber-100/50 blur-[80px] rounded-full -mr-32 -mb-32" />
 
     <div className="text-center mb-20 relative">
       <motion.h2 
@@ -309,15 +312,15 @@ const HowItWorks = () => (
           icon: FileText,
           title: "قدم طلب التقسيط",
           desc: "اختر خطة الدفع (6 أو 12 شهراً) وارفع الوثائق المطلوبة في أقل من دقيقتين.",
-          color: "bg-emerald-100 text-emerald-600",
-          blob: "bg-emerald-400"
+          color: "bg-amber-100 text-amber-600",
+          blob: "bg-amber-400"
         },
         {
           icon: CheckCircle,
           title: "استلم واستمتع",
           desc: "بمجرد موافقة شركة التمويل، سيقوم التاجر بتجهيز طلبك وتوصيله إليك فوراً.",
-          color: "bg-indigo-100 text-indigo-600",
-          blob: "bg-indigo-400"
+          color: "bg-blue-100 text-blue-600",
+          blob: "bg-blue-400"
         }
       ].map((step, idx) => (
         <motion.div 
@@ -546,8 +549,8 @@ export default function App() {
       />
 
       {/* Background Decorations */}
-      <div className="bg-blob w-[500px] h-[500px] bg-indigo-400 top-[-10%] right-[-10%]" />
-      <div className="bg-blob w-[400px] h-[400px] bg-emerald-400 bottom-[-10%] left-[-10%]" />
+      <div className="bg-blob w-[500px] h-[500px] bg-blue-400 top-[-10%] right-[-10%]" />
+      <div className="bg-blob w-[400px] h-[400px] bg-amber-400 bottom-[-10%] left-[-10%]" />
       <div className="bg-blob w-[300px] h-[300px] bg-rose-400 top-[40%] left-[-5%]" />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -556,13 +559,13 @@ export default function App() {
           <div className="flex gap-4 mb-8 border-b border-slate-200">
             <button 
               onClick={() => setView('home')}
-              className={`pb-4 px-2 font-bold text-sm transition-all ${view === 'home' ? 'text-emerald-600 border-b-2 border-emerald-600' : 'text-slate-400 hover:text-slate-600'}`}
+              className={`pb-4 px-2 font-bold text-sm transition-all ${view === 'home' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
             >
               المتجر
             </button>
             <button 
               onClick={() => setView('orders')}
-              className={`pb-4 px-2 font-bold text-sm transition-all ${view === 'orders' ? 'text-emerald-600 border-b-2 border-emerald-600' : 'text-slate-400 hover:text-slate-600'}`}
+              className={`pb-4 px-2 font-bold text-sm transition-all ${view === 'orders' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
             >
               طلباتي
             </button>
@@ -581,7 +584,7 @@ export default function App() {
               </div>
               <div className="flex gap-2">
                 {['الكل', 'إلكترونيات', 'أثاث', 'أجهزة منزلية'].map(cat => (
-                  <button key={cat} className="px-4 py-2 rounded-full text-sm font-bold bg-white border border-slate-200 text-slate-600 hover:border-emerald-500 hover:text-emerald-600 transition-all">
+                  <button key={cat} className="px-4 py-2 rounded-full text-sm font-bold bg-white border border-slate-200 text-slate-600 hover:border-blue-500 hover:text-blue-600 transition-all">
                     {cat}
                   </button>
                 ))}
@@ -648,7 +651,7 @@ export default function App() {
                     <div>
                       <h4 className="font-bold text-slate-900">{product.name}</h4>
                       <p className="text-sm text-slate-500">السعر الأصلي: {product.original_price} د.أ</p>
-                      <p className="text-xs text-emerald-600 font-bold mt-1">سعر التقسيط: {(product.original_price * (1 + TOTAL_MARKUP)).toFixed(2)} د.أ</p>
+                      <p className="text-xs text-blue-600 font-bold mt-1">سعر التقسيط: {(product.original_price * (1 + TOTAL_MARKUP)).toFixed(2)} د.أ</p>
                     </div>
                   </div>
                 ))}
@@ -662,7 +665,7 @@ export default function App() {
                   <input 
                     type="text" 
                     required
-                    className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none"
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
                     value={newProductForm.name}
                     onChange={e => setNewProductForm({...newProductForm, name: e.target.value})}
                   />
@@ -672,7 +675,7 @@ export default function App() {
                   <input 
                     type="number" 
                     required
-                    className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none"
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
                     value={newProductForm.original_price}
                     onChange={e => setNewProductForm({...newProductForm, original_price: e.target.value})}
                   />
@@ -681,7 +684,7 @@ export default function App() {
                   <label className="block text-sm font-bold text-slate-700 mb-1">رابط الصورة</label>
                   <input 
                     type="text" 
-                    className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none"
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
                     value={newProductForm.image_url}
                     onChange={e => setNewProductForm({...newProductForm, image_url: e.target.value})}
                   />
@@ -689,12 +692,12 @@ export default function App() {
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-1">وصف المنتج</label>
                   <textarea 
-                    className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none h-24"
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none h-24"
                     value={newProductForm.description}
                     onChange={e => setNewProductForm({...newProductForm, description: e.target.value})}
                   ></textarea>
                 </div>
-                <button className="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition-colors">
+                <button className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition-colors">
                   نشر المنتج
                 </button>
               </form>
@@ -729,7 +732,7 @@ export default function App() {
                           <div className="flex gap-2">
                             <button 
                               onClick={() => updateOrderStatus(order.id, 'approved')}
-                              className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-700 transition-colors"
+                              className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors"
                             >
                               قبول
                             </button>
@@ -788,13 +791,13 @@ export default function App() {
                 <div className="flex bg-slate-100 p-1 rounded-xl">
                   <button 
                     onClick={() => setAuthMode('login')}
-                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${authMode === 'login' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500'}`}
+                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${authMode === 'login' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}
                   >
                     دخول
                   </button>
                   <button 
                     onClick={() => setAuthMode('register')}
-                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${authMode === 'register' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500'}`}
+                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${authMode === 'register' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}
                   >
                     تسجيل
                   </button>
@@ -808,7 +811,7 @@ export default function App() {
                     <input 
                       type="email" 
                       required
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
                       placeholder="example@test.com"
                       value={loginForm.email}
                       onChange={e => setLoginForm({...loginForm, email: e.target.value})}
@@ -819,13 +822,13 @@ export default function App() {
                     <input 
                       type="password" 
                       required
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
                       placeholder="••••••••"
                       value={loginForm.password}
                       onChange={e => setLoginForm({...loginForm, password: e.target.value})}
                     />
                   </div>
-                  <button className="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-600/20">
+                  <button className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20">
                     دخول
                   </button>
                 </form>
@@ -837,7 +840,7 @@ export default function App() {
                       <input 
                         type="text" 
                         required
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none"
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
                         value={registerForm.name}
                         onChange={e => setRegisterForm({...registerForm, name: e.target.value})}
                       />
@@ -847,7 +850,7 @@ export default function App() {
                       <input 
                         type="text" 
                         required
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none"
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
                         value={registerForm.national_id}
                         onChange={e => setRegisterForm({...registerForm, national_id: e.target.value})}
                       />
@@ -857,7 +860,7 @@ export default function App() {
                       <input 
                         type="tel" 
                         required
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none"
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
                         value={registerForm.phone}
                         onChange={e => setRegisterForm({...registerForm, phone: e.target.value})}
                       />
@@ -867,7 +870,7 @@ export default function App() {
                       <input 
                         type="email" 
                         required
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none"
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
                         value={registerForm.email}
                         onChange={e => setRegisterForm({...registerForm, email: e.target.value})}
                       />
@@ -877,7 +880,7 @@ export default function App() {
                       <input 
                         type="password" 
                         required
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none"
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
                         value={registerForm.password}
                         onChange={e => setRegisterForm({...registerForm, password: e.target.value})}
                       />
@@ -892,7 +895,7 @@ export default function App() {
                         <input 
                           type="file" 
                           required
-                          className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                          className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                           onChange={e => setRegisterForm({...registerForm, id_front: e.target.files?.[0] || null})}
                         />
                       </div>
@@ -901,7 +904,7 @@ export default function App() {
                         <input 
                           type="file" 
                           required
-                          className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                          className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                           onChange={e => setRegisterForm({...registerForm, id_back: e.target.files?.[0] || null})}
                         />
                       </div>
@@ -910,7 +913,7 @@ export default function App() {
                         <input 
                           type="file" 
                           required
-                          className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                          className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                           onChange={e => setRegisterForm({...registerForm, social_security: e.target.files?.[0] || null})}
                         />
                       </div>
@@ -919,14 +922,14 @@ export default function App() {
                         <input 
                           type="file" 
                           required
-                          className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                          className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                           onChange={e => setRegisterForm({...registerForm, salary_slip: e.target.files?.[0] || null})}
                         />
                       </div>
                     </div>
                   </div>
 
-                  <button className="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-600/20">
+                  <button className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20">
                     إرسال الطلب وإنشاء الحساب
                   </button>
                 </form>
@@ -964,7 +967,7 @@ export default function App() {
             >
               <div className="p-6 border-b border-slate-100 flex justify-between items-center">
                 <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                  <ShoppingBag className="text-emerald-600" />
+                  <ShoppingBag className="text-blue-600" />
                   سلة المشتريات
                 </h2>
                 <button onClick={() => setIsCartOpen(false)} className="p-2 hover:bg-slate-100 rounded-full">
@@ -1002,7 +1005,7 @@ export default function App() {
                 <div className="p-6 bg-slate-50 border-t border-slate-100 space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-slate-600 font-medium">المجموع الكلي (تقسيط):</span>
-                    <span className="text-2xl font-black text-emerald-700">
+                    <span className="text-2xl font-black text-blue-700">
                       {(cart.reduce((sum, p) => sum + p.original_price, 0) * (1 + TOTAL_MARKUP)).toFixed(2)} د.أ
                     </span>
                   </div>
@@ -1017,7 +1020,7 @@ export default function App() {
                     </button>
                     <button 
                       onClick={() => handleCheckout(12)}
-                      className="bg-emerald-600 text-white py-4 rounded-xl font-bold hover:bg-emerald-700 transition-all flex flex-col items-center"
+                      className="bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition-all flex flex-col items-center"
                     >
                       <span className="text-xs opacity-70">تقسيط على</span>
                       12 شهراً
