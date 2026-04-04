@@ -74,9 +74,11 @@ db.exec(`
 const columns = db.prepare("PRAGMA table_info(users)").all() as any[];
 const columnNames = columns.map(c => c.name);
 if (!columnNames.includes("phone")) {
+  console.log("Adding 'phone' column to users table...");
   db.prepare("ALTER TABLE users ADD COLUMN phone TEXT").run();
 }
 if (!columnNames.includes("national_id")) {
+  console.log("Adding 'national_id' column to users table...");
   db.prepare("ALTER TABLE users ADD COLUMN national_id TEXT").run();
 }
 
@@ -89,13 +91,17 @@ const seedUsers = [
 ];
 
 for (const u of seedUsers) {
-  db.prepare("INSERT OR IGNORE INTO users (email, password, name, role) VALUES (?, ?, ?, ?)").run(u.email, u.password, u.name, u.role);
+  const result = db.prepare("INSERT OR IGNORE INTO users (email, password, name, role) VALUES (?, ?, ?, ?)").run(u.email, u.password, u.name, u.role);
+  if (result.changes > 0) {
+    console.log(`Seeded user: ${u.email}`);
+  }
 }
 
 const productCount = db.prepare("SELECT COUNT(*) as count FROM products").get() as { count: number };
 if (productCount.count === 0) {
   const merchant = db.prepare("SELECT id FROM users WHERE role = 'merchant' LIMIT 1").get() as any;
   if (merchant) {
+    console.log(`Seeding products for merchant ID: ${merchant.id}`);
     db.prepare("INSERT INTO products (merchant_id, name, description, original_price, image_url) VALUES (?, ?, ?, ?, ?)").run(
       merchant.id,
       "iPhone 15 Pro",
@@ -110,13 +116,15 @@ if (productCount.count === 0) {
       1199,
       "https://picsum.photos/seed/macbook/400/400"
     );
+  } else {
+    console.warn("No merchant found to seed products.");
   }
 }
 
 db.prepare("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)").run("site_name", "قسطني");
 db.prepare("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)").run("site_logo", "https://i.ibb.co/pjybBgHC/logo.png");
 
-console.log("Database seeded successfully.");
+console.log("Database initialization and seeding complete.");
 
 async function startServer() {
   const app = express();
@@ -126,38 +134,52 @@ async function startServer() {
   app.post("/api/login", (req, res) => {
     const { email, password } = req.body;
     console.log(`Login attempt: ${email}`);
-    const user = db.prepare("SELECT * FROM users WHERE email = ? AND password = ?").get(email, password) as any;
-    if (user) {
-      console.log(`Login success: ${email} (Role: ${user.role})`);
-      const { password: _, ...userWithoutPassword } = user;
-      res.json(userWithoutPassword);
-    } else {
-      console.log(`Login failed: ${email}`);
-      res.status(401).json({ error: "Invalid credentials" });
+    try {
+      const user = db.prepare("SELECT * FROM users WHERE email = ? AND password = ?").get(email, password) as any;
+      if (user) {
+        console.log(`Login success: ${email} (Role: ${user.role})`);
+        const { password: _, ...userWithoutPassword } = user;
+        res.json(userWithoutPassword);
+      } else {
+        console.log(`Login failed: ${email} (Invalid credentials)`);
+        res.status(401).json({ error: "خطأ في البريد الإلكتروني أو كلمة المرور" });
+      }
+    } catch (error) {
+      console.error(`Login error for ${email}:`, error);
+      res.status(500).json({ error: "حدث خطأ في الخادم أثناء تسجيل الدخول" });
     }
   });
 
   app.post("/api/register", (req, res) => {
     const { email, password, name, phone, national_id, role = 'customer' } = req.body;
+    console.log(`Registration attempt: ${email}`);
     try {
       const result = db.prepare("INSERT INTO users (email, password, name, phone, national_id, role) VALUES (?, ?, ?, ?, ?, ?)").run(
         email, password, name, phone, national_id, role
       );
+      console.log(`Registration success: ${email} (ID: ${result.lastInsertRowid})`);
       const user = db.prepare("SELECT * FROM users WHERE id = ?").get(result.lastInsertRowid) as any;
       const { password: _, ...userWithoutPassword } = user;
       res.json(userWithoutPassword);
     } catch (error: any) {
+      console.error(`Registration error for ${email}:`, error);
       if (error.code === 'SQLITE_CONSTRAINT') {
         res.status(400).json({ error: "البريد الإلكتروني مسجل مسبقاً" });
       } else {
-        res.status(500).json({ error: "حدث خطأ أثناء التسجيل" });
+        res.status(500).json({ error: "حدث خطأ أثناء التسجيل. يرجى المحاولة لاحقاً." });
       }
     }
   });
 
   app.get("/api/products", (req, res) => {
-    const products = db.prepare("SELECT * FROM products").all();
-    res.json(products);
+    try {
+      const products = db.prepare("SELECT * FROM products").all();
+      console.log(`Fetched ${products.length} products`);
+      res.json(products);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      res.status(500).json({ error: "حدث خطأ أثناء جلب المنتجات" });
+    }
   });
 
   app.post("/api/products", (req, res) => {

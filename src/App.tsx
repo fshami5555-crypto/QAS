@@ -700,34 +700,49 @@ export default function App() {
   }, [user]);
 
   const fetchProducts = async () => {
-    const res = await fetch('/api/products');
-    const data = await res.json();
-    setProducts(data);
+    try {
+      const res = await fetch('/api/products');
+      if (!res.ok) throw new Error('Failed to fetch products');
+      const data = await res.json();
+      setProducts(data);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
   };
 
   const fetchOrders = async () => {
     if (!user) return;
-    const res = await fetch(`/api/orders?role=${user.role}&userId=${user.id}`);
-    const data = await res.json();
-    setOrders(data);
+    try {
+      const res = await fetch(`/api/orders?role=${user.role}&userId=${user.id}`);
+      if (!res.ok) throw new Error('Failed to fetch orders');
+      const data = await res.json();
+      setOrders(data);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(loginForm)
-    });
-    if (res.ok) {
-      const userData = await res.json();
-      setUser(userData);
-      setIsLoginModalOpen(false);
-      if (pendingCheckout) {
-        handleCheckout(pendingCheckout.plan, userData);
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(loginForm)
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setUser(data);
+        setIsLoginModalOpen(false);
+        if (pendingCheckout) {
+          handleCheckout(pendingCheckout.plan, data);
+        }
+      } else {
+        alert(data.error || 'خطأ في بيانات الدخول');
       }
-    } else {
-      alert('خطأ في بيانات الدخول');
+    } catch (error) {
+      console.error("Login error:", error);
+      alert('حدث خطأ أثناء الاتصال بالخادم');
     }
   };
 
