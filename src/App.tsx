@@ -64,26 +64,26 @@ const TOTAL_MARKUP = COMMISSION_RATE + INTEREST_RATE;
 const Navbar = ({ user, onLogout, cartCount, onOpenCart, onLoginClick, siteSettings }: { user: User | null, onLogout: () => void, cartCount: number, onOpenCart: () => void, onLoginClick: () => void, siteSettings: { site_name: string, site_logo: string } }) => (
   <nav className="bg-white/90 backdrop-blur-md border-b border-slate-100 sticky top-0 z-50">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="flex justify-between h-20 items-center">
+      <div className="flex justify-between h-16 md:h-20 items-center">
         <motion.div 
           whileHover={{ scale: 1.02 }}
-          className="flex items-center gap-3 group cursor-pointer"
+          className="flex items-center gap-2 md:gap-3 group cursor-pointer"
         >
           <img 
             src={siteSettings.site_logo} 
             alt={siteSettings.site_name} 
-            className="h-12 w-auto object-contain"
+            className="h-8 md:h-12 w-auto object-contain"
             onError={(e) => {
               e.currentTarget.src = "https://i.ibb.co/vX8Yyv0/qistni-placeholder.png";
             }}
           />
           <div className="flex flex-col leading-none">
-            <span className="text-2xl font-black text-blue-900 tracking-tight">{siteSettings.site_name}</span>
-            <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Qistni</span>
+            <span className="text-lg md:text-2xl font-black text-blue-900 tracking-tight">{siteSettings.site_name}</span>
+            <span className="text-[8px] md:text-[10px] font-bold text-blue-600 uppercase tracking-widest">Qistni</span>
           </div>
         </motion.div>
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
           {user ? (
             <>
               <div className="hidden md:flex items-center gap-2 text-slate-600 ml-4 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-100">
@@ -98,14 +98,14 @@ const Navbar = ({ user, onLogout, cartCount, onOpenCart, onLoginClick, siteSetti
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={onOpenCart}
-                  className="relative p-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 rounded-2xl transition-colors"
+                  className="relative p-2 md:p-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 rounded-xl md:rounded-2xl transition-colors"
                 >
-                  <ShoppingCart size={24} />
+                  <ShoppingCart size={20} className="md:w-[24px]" />
                   {cartCount > 0 && (
                     <motion.span 
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      className="absolute top-1 right-1 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full ring-2 ring-white"
+                      className="absolute top-0 right-0 md:top-1 md:right-1 bg-amber-500 text-white text-[8px] md:text-[10px] font-bold px-1.5 md:px-2 py-0.5 rounded-full ring-2 ring-white"
                     >
                       {cartCount}
                     </motion.span>
@@ -116,9 +116,9 @@ const Navbar = ({ user, onLogout, cartCount, onOpenCart, onLoginClick, siteSetti
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={onLogout}
-                className="p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-2xl transition-all"
+                className="p-2 md:p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl md:rounded-2xl transition-all"
               >
-                <LogOut size={22} />
+                <LogOut size={20} className="md:w-[22px]" />
               </motion.button>
             </>
           ) : (
@@ -126,9 +126,9 @@ const Navbar = ({ user, onLogout, cartCount, onOpenCart, onLoginClick, siteSetti
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={onLoginClick}
-              className="bg-blue-700 text-white px-8 py-3 rounded-2xl font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-700/20"
+              className="bg-blue-700 text-white px-4 md:px-8 py-2 md:py-3 rounded-xl md:rounded-2xl text-sm md:text-base font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-700/20"
             >
-              تسجيل الدخول
+              دخول
             </motion.button>
           )}
         </div>
@@ -154,7 +154,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true }}
       whileHover={{ y: -10 }}
-      className="bg-white rounded-[2.5rem] border border-slate-100 overflow-hidden shadow-sm hover:shadow-2xl transition-all group"
+      className="bg-white rounded-[2rem] md:rounded-[2.5rem] border border-slate-100 overflow-hidden shadow-sm hover:shadow-2xl transition-all group"
     >
       <div className="aspect-[4/5] relative overflow-hidden">
         <img 
@@ -163,22 +163,22 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
           referrerPolicy="no-referrer"
         />
-        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full text-xs font-black text-blue-600 shadow-lg">
+        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full text-[10px] md:text-xs font-black text-blue-600 shadow-lg">
           تقسيط ميسر
         </div>
       </div>
-      <div className="p-6">
-        <h3 className="text-xl font-black text-slate-900 mb-2">{product.name}</h3>
-        <p className="text-slate-500 text-sm mb-6 line-clamp-2 leading-relaxed">{product.description}</p>
+      <div className="p-4 md:p-6">
+        <h3 className="text-lg md:text-xl font-black text-slate-900 mb-2">{product.name}</h3>
+        <p className="text-slate-500 text-xs md:text-sm mb-4 md:mb-6 line-clamp-2 leading-relaxed">{product.description}</p>
         
-        <div className="grid grid-cols-2 gap-3 mb-8">
-          <div className="bg-blue-50 p-3 rounded-3xl text-center">
-            <span className="block text-[10px] text-blue-400 font-bold uppercase mb-1">6 أشهر</span>
-            <span className="text-lg font-black text-blue-700">{monthly6} <span className="text-xs">د.أ</span></span>
+        <div className="grid grid-cols-2 gap-2 md:gap-3 mb-6 md:mb-8">
+          <div className="bg-blue-50 p-2 md:p-3 rounded-2xl md:rounded-3xl text-center">
+            <span className="block text-[8px] md:text-[10px] text-blue-400 font-bold uppercase mb-1">6 أشهر</span>
+            <span className="text-base md:text-lg font-black text-blue-700">{monthly6} <span className="text-[10px] md:text-xs">د.أ</span></span>
           </div>
-          <div className="bg-amber-50 p-3 rounded-3xl text-center">
-            <span className="block text-[10px] text-amber-500 font-bold uppercase mb-1">12 شهر</span>
-            <span className="text-lg font-black text-amber-700">{monthly12} <span className="text-xs">د.أ</span></span>
+          <div className="bg-amber-50 p-2 md:p-3 rounded-2xl md:rounded-3xl text-center">
+            <span className="block text-[8px] md:text-[10px] text-amber-500 font-bold uppercase mb-1">12 شهر</span>
+            <span className="text-base md:text-lg font-black text-amber-700">{monthly12} <span className="text-[10px] md:text-xs">د.أ</span></span>
           </div>
         </div>
 
@@ -186,9 +186,9 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => onAddToCart(product)}
-          className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black hover:bg-blue-700 transition-all flex items-center justify-center gap-3 shadow-lg shadow-slate-200"
+          className="w-full bg-slate-900 text-white py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-sm md:text-base hover:bg-blue-700 transition-all flex items-center justify-center gap-2 md:gap-3 shadow-lg shadow-slate-200"
         >
-          <Plus size={20} />
+          <Plus size={18} className="md:w-[20px]" />
           إضافة للسلة
         </motion.button>
       </div>
@@ -214,8 +214,63 @@ const OrderStatusBadge = ({ status }: { status: Order['status'] }) => {
   );
 };
 
+const Footer = ({ siteSettings }: { siteSettings: { site_name: string, site_logo: string } }) => (
+  <footer className="bg-slate-900 text-white pt-20 pb-10 rounded-t-[3rem] mt-20 overflow-hidden relative">
+    <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/10 blur-[100px] rounded-full -mr-48 -mt-48" />
+    <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+        <div className="md:col-span-2">
+          <div className="flex items-center gap-3 mb-6">
+            <img 
+              src={siteSettings.site_logo} 
+              alt={siteSettings.site_name} 
+              className="h-10 w-auto brightness-0 invert"
+              onError={(e) => {
+                e.currentTarget.src = "https://i.ibb.co/vX8Yyv0/qistni-placeholder.png";
+              }}
+            />
+            <span className="text-2xl font-black tracking-tight">{siteSettings.site_name}</span>
+          </div>
+          <p className="text-slate-400 text-lg leading-relaxed max-w-md">
+            المنصة الرائدة في الأردن لتقسيط المشتريات. نسعى لتوفير حلول مالية ذكية وميسرة تمكن الجميع من الحصول على ما يحتاجونه اليوم والدفع لاحقاً بكل أمان.
+          </p>
+        </div>
+        
+        <div>
+          <h4 className="text-lg font-black mb-6 text-blue-400">روابط سريعة</h4>
+          <ul className="space-y-4 text-slate-400 font-bold">
+            <li><a href="#" className="hover:text-white transition-colors">الرئيسية</a></li>
+            <li><a href="#" className="hover:text-white transition-colors">المتجر</a></li>
+            <li><a href="#" className="hover:text-white transition-colors">كيف نعمل</a></li>
+            <li><a href="#" className="hover:text-white transition-colors">الأسئلة الشائعة</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="text-lg font-black mb-6 text-amber-400">تواصل معنا</h4>
+          <ul className="space-y-4 text-slate-400 font-bold">
+            <li>عمان، الأردن</li>
+            <li>info@qistni.jo</li>
+            <li dir="ltr">+962 6 000 0000</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6">
+        <p className="text-slate-500 text-sm font-bold">
+          © {new Date().getFullYear()} {siteSettings.site_name}. جميع الحقوق محفوظة.
+        </p>
+        <div className="flex gap-6 text-slate-500 text-sm font-bold">
+          <a href="#" className="hover:text-white transition-colors">سياسة الخصوصية</a>
+          <a href="#" className="hover:text-white transition-colors">الشروط والأحكام</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+);
+
 const Hero = ({ onShopNow }: { onShopNow: () => void }) => (
-  <div className="relative bg-slate-900 rounded-[3rem] overflow-hidden mb-20 shadow-2xl shadow-blue-900/20">
+  <div className="relative bg-slate-900 rounded-[2rem] md:rounded-[3rem] overflow-hidden mb-12 md:mb-20 shadow-2xl shadow-blue-900/20 mx-2 md:mx-0">
     <div className="absolute inset-0 opacity-30">
       <img 
         src="https://picsum.photos/seed/finance/1920/1080?blur=1" 
@@ -226,24 +281,24 @@ const Hero = ({ onShopNow }: { onShopNow: () => void }) => (
     </div>
     
     {/* Floating Blobs */}
-    <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/20 blur-[100px] rounded-full -mr-48 -mt-48 animate-pulse" />
-    <div className="absolute bottom-0 left-0 w-96 h-96 bg-amber-600/10 blur-[100px] rounded-full -ml-48 -mb-48 animate-pulse" />
+    <div className="absolute top-0 right-0 w-64 md:w-96 h-64 md:h-96 bg-blue-600/20 blur-[60px] md:blur-[100px] rounded-full -mr-32 md:-mr-48 -mt-32 md:-mt-48 animate-pulse" />
+    <div className="absolute bottom-0 left-0 w-64 md:w-96 h-64 md:h-96 bg-amber-600/10 blur-[60px] md:blur-[100px] rounded-full -ml-32 md:-ml-48 -mb-32 md:-mb-48 animate-pulse" />
 
-    <div className="relative px-10 py-24 lg:py-40 flex flex-col items-center text-center lg:items-start lg:text-right max-w-4xl mr-auto lg:mr-16">
+    <div className="relative px-6 py-16 md:px-10 md:py-24 lg:py-40 flex flex-col items-center text-center lg:items-start lg:text-right max-w-4xl mr-auto lg:mr-16">
       <motion.div
         initial={{ opacity: 0, x: 50 }}
         animate={{ opacity: 1, x: 0 }}
-        className="inline-flex items-center gap-3 bg-blue-500/20 border border-blue-500/30 px-6 py-2 rounded-full text-blue-300 text-sm font-black mb-8 backdrop-blur-md"
+        className="inline-flex items-center gap-3 bg-blue-500/20 border border-blue-500/30 px-4 md:px-6 py-2 rounded-full text-blue-300 text-xs md:text-sm font-black mb-6 md:mb-8 backdrop-blur-md"
       >
-        <CreditCard size={18} />
-        <span>قسط مشترياتك بكل سهولة وأمان مع قسطني</span>
+        <CreditCard size={16} className="md:w-[18px]" />
+        <span>قسط مشترياتك بكل سهولة وأمان</span>
       </motion.div>
       
       <motion.h1 
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.8 }}
-        className="text-6xl lg:text-8xl font-black text-white mb-8 leading-[1.05] tracking-tight"
+        className="text-4xl sm:text-6xl lg:text-8xl font-black text-white mb-6 md:mb-8 leading-[1.1] tracking-tight"
       >
         اشترِ اليوم.. <br/>
         <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-amber-400">وادفع لاحقاً</span>
@@ -253,7 +308,7 @@ const Hero = ({ onShopNow }: { onShopNow: () => void }) => (
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.8 }}
-        className="text-slate-300 text-xl mb-12 max-w-2xl leading-relaxed font-medium"
+        className="text-slate-300 text-base md:text-xl mb-8 md:mb-12 max-w-2xl leading-relaxed font-medium"
       >
         منصة قسطني توفر لك تجربة تسوق ذكية وممتعة. احصل على أحدث المنتجات الآن ووزع التكلفة على دفعات شهرية مريحة تناسب نمط حياتك.
       </motion.p>
@@ -262,13 +317,13 @@ const Hero = ({ onShopNow }: { onShopNow: () => void }) => (
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.8 }}
-        className="flex flex-wrap gap-6"
+        className="flex flex-col sm:flex-row gap-4 md:gap-6 w-full sm:w-auto"
       >
         <motion.button 
           whileHover={{ scale: 1.05, y: -5 }}
           whileTap={{ scale: 0.95 }}
           onClick={onShopNow}
-          className="bg-blue-700 text-white px-10 py-5 rounded-[2rem] font-black text-xl hover:bg-blue-600 transition-all shadow-2xl shadow-blue-700/40 flex items-center gap-3"
+          className="bg-blue-700 text-white px-8 md:px-10 py-4 md:py-5 rounded-2xl md:rounded-[2rem] font-black text-lg md:text-xl hover:bg-blue-600 transition-all shadow-2xl shadow-blue-700/40 flex items-center justify-center gap-3"
         >
           ابدأ التسوق الآن
           <ChevronRight className="rotate-180" />
@@ -276,7 +331,7 @@ const Hero = ({ onShopNow }: { onShopNow: () => void }) => (
         <motion.button 
           whileHover={{ scale: 1.05, bg: "rgba(255,255,255,0.2)" }}
           whileTap={{ scale: 0.95 }}
-          className="bg-white/10 text-white border border-white/20 px-10 py-5 rounded-[2rem] font-black text-xl transition-all backdrop-blur-md"
+          className="bg-white/10 text-white border border-white/20 px-8 md:px-10 py-4 md:py-5 rounded-2xl md:rounded-[2rem] font-black text-lg md:text-xl transition-all backdrop-blur-md"
         >
           تعرف علينا أكثر
         </motion.button>
@@ -286,24 +341,24 @@ const Hero = ({ onShopNow }: { onShopNow: () => void }) => (
 );
 
 const HowItWorks = () => (
-  <div className="py-32 border-t border-slate-200 relative overflow-hidden">
+  <div className="py-16 md:py-32 border-t border-slate-200 relative overflow-hidden">
     {/* Decorative Blobs */}
     <div className="absolute top-0 left-0 w-64 h-64 bg-blue-100/50 blur-[80px] rounded-full -ml-32 -mt-32" />
     <div className="absolute bottom-0 right-0 w-64 h-64 bg-amber-100/50 blur-[80px] rounded-full -mr-32 -mb-32" />
 
-    <div className="text-center mb-20 relative">
+    <div className="text-center mb-12 md:mb-20 relative">
       <motion.h2 
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="text-4xl lg:text-5xl font-black text-slate-900 mb-6"
+        className="text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 mb-4 md:mb-6"
       >
         كيف تعمل قسطني؟
       </motion.h2>
-      <p className="text-slate-500 text-lg">ثلاث خطوات بسيطة تفصلك عن امتلاك ما تحلم به</p>
+      <p className="text-slate-500 text-base md:text-lg px-6">ثلاث خطوات بسيطة تفصلك عن امتلاك ما تحلم به</p>
     </div>
     
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-16 relative">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16 relative px-6 md:px-0">
       {[
         {
           icon: ShoppingBag,
@@ -409,28 +464,28 @@ const AdminDashboard = ({ products, onFetchProducts, siteSettings, onUpdateSetti
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <h2 className="text-3xl font-black text-slate-900">لوحة تحكم المدير</h2>
-        <div className="flex bg-slate-100 p-1 rounded-2xl">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <h2 className="text-2xl md:text-3xl font-black text-slate-900">لوحة تحكم المدير</h2>
+        <div className="flex bg-slate-100 p-1 rounded-2xl overflow-x-auto no-scrollbar w-full md:w-auto">
           <button 
             onClick={() => setActiveTab('users')}
-            className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'users' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}
+            className={`px-4 md:px-6 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === 'users' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}
           >
-            <Users size={18} />
+            <Users size={16} className="md:w-[18px]" />
             المستخدمين
           </button>
           <button 
             onClick={() => setActiveTab('products')}
-            className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'products' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}
+            className={`px-4 md:px-6 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === 'products' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}
           >
-            <Package size={18} />
+            <Package size={16} className="md:w-[18px]" />
             المنتجات
           </button>
           <button 
             onClick={() => setActiveTab('settings')}
-            className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'settings' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}
+            className={`px-4 md:px-6 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === 'settings' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}
           >
-            <Settings size={18} />
+            <Settings size={16} className="md:w-[18px]" />
             الإعدادات
           </button>
         </div>
@@ -439,41 +494,43 @@ const AdminDashboard = ({ products, onFetchProducts, siteSettings, onUpdateSetti
       {activeTab === 'users' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 bg-white rounded-[2rem] border border-slate-200 overflow-hidden">
-            <table className="w-full text-right">
-              <thead className="bg-slate-50 border-b border-slate-200">
-                <tr>
-                  <th className="px-6 py-4 text-sm font-bold text-slate-600">الاسم</th>
-                  <th className="px-6 py-4 text-sm font-bold text-slate-600">الدور</th>
-                  <th className="px-6 py-4 text-sm font-bold text-slate-600">الإجراءات</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {users.map(u => (
-                  <tr key={u.id}>
-                    <td className="px-6 py-4">
-                      <div className="font-bold text-slate-900">{u.name}</div>
-                      <div className="text-xs text-slate-500">{u.email}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${
-                        u.role === 'admin' ? 'bg-rose-100 text-rose-700' :
-                        u.role === 'merchant' ? 'bg-blue-100 text-blue-700' :
-                        u.role === 'financier' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'
-                      }`}>
-                        {u.role}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      {u.role !== 'admin' && (
-                        <button onClick={() => handleDeleteUser(u.id)} className="text-rose-600 hover:bg-rose-50 p-2 rounded-lg transition-colors">
-                          <Trash2 size={18} />
-                        </button>
-                      )}
-                    </td>
+            <div className="overflow-x-auto no-scrollbar">
+              <table className="w-full text-right min-w-[500px]">
+                <thead className="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th className="px-6 py-4 text-sm font-bold text-slate-600">الاسم</th>
+                    <th className="px-6 py-4 text-sm font-bold text-slate-600">الدور</th>
+                    <th className="px-6 py-4 text-sm font-bold text-slate-600">الإجراءات</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {users.map(u => (
+                    <tr key={u.id}>
+                      <td className="px-6 py-4">
+                        <div className="font-bold text-slate-900">{u.name}</div>
+                        <div className="text-xs text-slate-500">{u.email}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${
+                          u.role === 'admin' ? 'bg-rose-100 text-rose-700' :
+                          u.role === 'merchant' ? 'bg-blue-100 text-blue-700' :
+                          u.role === 'financier' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'
+                        }`}>
+                          {u.role}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        {u.role !== 'admin' && (
+                          <button onClick={() => handleDeleteUser(u.id)} className="text-rose-600 hover:bg-rose-50 p-2 rounded-lg transition-colors">
+                            <Trash2 size={18} />
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
           <div className="bg-white p-8 rounded-[2rem] border border-slate-200 h-fit">
             <h3 className="text-xl font-black text-slate-900 mb-6">إضافة مستخدم جديد</h3>
@@ -527,31 +584,33 @@ const AdminDashboard = ({ products, onFetchProducts, siteSettings, onUpdateSetti
 
       {activeTab === 'products' && (
         <div className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden">
-          <table className="w-full text-right">
-            <thead className="bg-slate-50 border-b border-slate-200">
-              <tr>
-                <th className="px-6 py-4 text-sm font-bold text-slate-600">المنتج</th>
-                <th className="px-6 py-4 text-sm font-bold text-slate-600">السعر</th>
-                <th className="px-6 py-4 text-sm font-bold text-slate-600">الإجراءات</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {products.map(p => (
-                <tr key={p.id}>
-                  <td className="px-6 py-4 flex items-center gap-4">
-                    <img src={p.image_url} className="w-12 h-12 rounded-lg object-cover" referrerPolicy="no-referrer" />
-                    <span className="font-bold text-slate-900">{p.name}</span>
-                  </td>
-                  <td className="px-6 py-4 text-sm font-bold text-slate-900">{p.original_price} د.أ</td>
-                  <td className="px-6 py-4">
-                    <button onClick={() => handleDeleteProduct(p.id)} className="text-rose-600 hover:bg-rose-50 p-2 rounded-lg transition-colors">
-                      <Trash2 size={18} />
-                    </button>
-                  </td>
+          <div className="overflow-x-auto no-scrollbar">
+            <table className="w-full text-right min-w-[500px]">
+              <thead className="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th className="px-6 py-4 text-sm font-bold text-slate-600">المنتج</th>
+                  <th className="px-6 py-4 text-sm font-bold text-slate-600">السعر</th>
+                  <th className="px-6 py-4 text-sm font-bold text-slate-600">الإجراءات</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {products.map(p => (
+                  <tr key={p.id}>
+                    <td className="px-6 py-4 flex items-center gap-4">
+                      <img src={p.image_url} className="w-12 h-12 rounded-lg object-cover" referrerPolicy="no-referrer" />
+                      <span className="font-bold text-slate-900">{p.name}</span>
+                    </td>
+                    <td className="px-6 py-4 text-sm font-bold text-slate-900">{p.original_price} د.أ</td>
+                    <td className="px-6 py-4">
+                      <button onClick={() => handleDeleteProduct(p.id)} className="text-rose-600 hover:bg-rose-50 p-2 rounded-lg transition-colors">
+                        <Trash2 size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
@@ -806,16 +865,16 @@ export default function App() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Navigation Tabs for Customer */}
         {user?.role === 'customer' && (
-          <div className="flex gap-4 mb-8 border-b border-slate-200">
+          <div className="flex gap-2 md:gap-4 mb-8 border-b border-slate-200 overflow-x-auto no-scrollbar">
             <button 
               onClick={() => setView('home')}
-              className={`pb-4 px-2 font-bold text-sm transition-all ${view === 'home' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
+              className={`pb-4 px-4 font-bold text-sm transition-all whitespace-nowrap ${view === 'home' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
             >
               المتجر
             </button>
             <button 
               onClick={() => setView('orders')}
-              className={`pb-4 px-2 font-bold text-sm transition-all ${view === 'orders' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
+              className={`pb-4 px-4 font-bold text-sm transition-all whitespace-nowrap ${view === 'orders' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
             >
               طلباتي
             </button>
@@ -824,16 +883,16 @@ export default function App() {
 
         {/* Navigation Tabs for Admin */}
         {user?.role === 'admin' && (
-          <div className="flex gap-4 mb-8 border-b border-slate-200">
+          <div className="flex gap-2 md:gap-4 mb-8 border-b border-slate-200 overflow-x-auto no-scrollbar">
             <button 
               onClick={() => setView('home')}
-              className={`pb-4 px-2 font-bold text-sm transition-all ${view === 'home' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
+              className={`pb-4 px-4 font-bold text-sm transition-all whitespace-nowrap ${view === 'home' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
             >
               المتجر (معاينة)
             </button>
             <button 
               onClick={() => setView('admin')}
-              className={`pb-4 px-2 font-bold text-sm transition-all ${view === 'admin' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
+              className={`pb-4 px-4 font-bold text-sm transition-all whitespace-nowrap ${view === 'admin' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
             >
               لوحة التحكم
             </button>
@@ -845,21 +904,21 @@ export default function App() {
           <div>
             <Hero onShopNow={() => document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth' })} />
             
-            <div id="products-section" className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div id="products-section" className="mb-8 md:mb-12 flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div>
-                <h2 className="text-3xl font-black text-slate-900 mb-2">المنتجات المميزة</h2>
-                <p className="text-slate-500">اكتشف أحدث المنتجات المتاحة للتقسيط الفوري</p>
+                <h2 className="text-2xl md:text-3xl font-black text-slate-900 mb-2">المنتجات المميزة</h2>
+                <p className="text-sm md:text-base text-slate-500">اكتشف أحدث المنتجات المتاحة للتقسيط الفوري</p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 md:pb-0">
                 {['الكل', 'إلكترونيات', 'أثاث', 'أجهزة منزلية'].map(cat => (
-                  <button key={cat} className="px-4 py-2 rounded-full text-sm font-bold bg-white border border-slate-200 text-slate-600 hover:border-blue-500 hover:text-blue-600 transition-all">
+                  <button key={cat} className="px-4 py-2 rounded-full text-xs md:text-sm font-bold bg-white border border-slate-200 text-slate-600 hover:border-blue-500 hover:text-blue-600 transition-all whitespace-nowrap">
                     {cat}
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-20">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-12 md:mb-20">
               {products.map(product => (
                 <ProductCard key={product.id} product={product} onAddToCart={handleAddToCart} />
               ))}
@@ -872,37 +931,39 @@ export default function App() {
         {/* Customer Orders View */}
         {view === 'orders' && (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-slate-900">تتبع طلبات التقسيط</h2>
+            <h2 className="text-xl md:text-2xl font-bold text-slate-900">تتبع طلبات التقسيط</h2>
             <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-              <table className="w-full text-right">
-                <thead className="bg-slate-50 border-b border-slate-200">
-                  <tr>
-                    <th className="px-6 py-4 text-sm font-bold text-slate-600">رقم الطلب</th>
-                    <th className="px-6 py-4 text-sm font-bold text-slate-600">التاريخ</th>
-                    <th className="px-6 py-4 text-sm font-bold text-slate-600">القيمة الإجمالية</th>
-                    <th className="px-6 py-4 text-sm font-bold text-slate-600">خطة الدفع</th>
-                    <th className="px-6 py-4 text-sm font-bold text-slate-600">الحالة</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {orders.map(order => (
-                    <tr key={order.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-6 py-4 text-sm font-medium text-slate-900">#{order.id}</td>
-                      <td className="px-6 py-4 text-sm text-slate-500">{new Date(order.created_at).toLocaleDateString('ar-EG')}</td>
-                      <td className="px-6 py-4 text-sm font-bold text-slate-900">{order.total_price.toFixed(2)} د.أ</td>
-                      <td className="px-6 py-4 text-sm text-slate-600">{order.installment_plan} شهراً</td>
-                      <td className="px-6 py-4">
-                        <OrderStatusBadge status={order.status} />
-                      </td>
-                    </tr>
-                  ))}
-                  {orders.length === 0 && (
+              <div className="overflow-x-auto no-scrollbar">
+                <table className="w-full text-right min-w-[600px]">
+                  <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center text-slate-400">لا يوجد طلبات حالية</td>
+                      <th className="px-6 py-4 text-sm font-bold text-slate-600">رقم الطلب</th>
+                      <th className="px-6 py-4 text-sm font-bold text-slate-600">التاريخ</th>
+                      <th className="px-6 py-4 text-sm font-bold text-slate-600">القيمة الإجمالية</th>
+                      <th className="px-6 py-4 text-sm font-bold text-slate-600">خطة الدفع</th>
+                      <th className="px-6 py-4 text-sm font-bold text-slate-600">الحالة</th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {orders.map(order => (
+                      <tr key={order.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-6 py-4 text-sm font-medium text-slate-900">#{order.id}</td>
+                        <td className="px-6 py-4 text-sm text-slate-500">{new Date(order.created_at).toLocaleDateString('ar-EG')}</td>
+                        <td className="px-6 py-4 text-sm font-bold text-slate-900">{order.total_price.toFixed(2)} د.أ</td>
+                        <td className="px-6 py-4 text-sm text-slate-600">{order.installment_plan} شهراً</td>
+                        <td className="px-6 py-4">
+                          <OrderStatusBadge status={order.status} />
+                        </td>
+                      </tr>
+                    ))}
+                    {orders.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="px-6 py-12 text-center text-slate-400">لا يوجد طلبات حالية</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
@@ -976,55 +1037,57 @@ export default function App() {
         {/* Financier View */}
         {view === 'financier' && (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-slate-900">طلبات التمويل الواردة</h2>
+            <h2 className="text-xl md:text-2xl font-bold text-slate-900">طلبات التمويل الواردة</h2>
             <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-              <table className="w-full text-right">
-                <thead className="bg-slate-50 border-b border-slate-200">
-                  <tr>
-                    <th className="px-6 py-4 text-sm font-bold text-slate-600">رقم الطلب</th>
-                    <th className="px-6 py-4 text-sm font-bold text-slate-600">العميل</th>
-                    <th className="px-6 py-4 text-sm font-bold text-slate-600">المبلغ الإجمالي</th>
-                    <th className="px-6 py-4 text-sm font-bold text-slate-600">الخطة</th>
-                    <th className="px-6 py-4 text-sm font-bold text-slate-600">الإجراءات</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {orders.map(order => (
-                    <tr key={order.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-6 py-4 text-sm font-medium text-slate-900">#{order.id}</td>
-                      <td className="px-6 py-4 text-sm text-slate-600">عميل رقم {order.customer_id}</td>
-                      <td className="px-6 py-4 text-sm font-bold text-slate-900">{order.total_price.toFixed(2)} د.أ</td>
-                      <td className="px-6 py-4 text-sm text-slate-600">{order.installment_plan} شهراً</td>
-                      <td className="px-6 py-4">
-                        {order.status === 'pending' ? (
-                          <div className="flex gap-2">
-                            <button 
-                              onClick={() => updateOrderStatus(order.id, 'approved')}
-                              className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors"
-                            >
-                              قبول
-                            </button>
-                            <button 
-                              onClick={() => updateOrderStatus(order.id, 'rejected')}
-                              className="bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-700 transition-colors"
-                            >
-                              رفض
-                            </button>
-                            <button 
-                              onClick={() => updateOrderStatus(order.id, 'modification_requested')}
-                              className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors"
-                            >
-                              نواقص
-                            </button>
-                          </div>
-                        ) : (
-                          <OrderStatusBadge status={order.status} />
-                        )}
-                      </td>
+              <div className="overflow-x-auto no-scrollbar">
+                <table className="w-full text-right min-w-[700px]">
+                  <thead className="bg-slate-50 border-b border-slate-200">
+                    <tr>
+                      <th className="px-6 py-4 text-sm font-bold text-slate-600">رقم الطلب</th>
+                      <th className="px-6 py-4 text-sm font-bold text-slate-600">العميل</th>
+                      <th className="px-6 py-4 text-sm font-bold text-slate-600">المبلغ الإجمالي</th>
+                      <th className="px-6 py-4 text-sm font-bold text-slate-600">الخطة</th>
+                      <th className="px-6 py-4 text-sm font-bold text-slate-600">الإجراءات</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {orders.map(order => (
+                      <tr key={order.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-6 py-4 text-sm font-medium text-slate-900">#{order.id}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600">عميل رقم {order.customer_id}</td>
+                        <td className="px-6 py-4 text-sm font-bold text-slate-900">{order.total_price.toFixed(2)} د.أ</td>
+                        <td className="px-6 py-4 text-sm text-slate-600">{order.installment_plan} شهراً</td>
+                        <td className="px-6 py-4">
+                          {order.status === 'pending' ? (
+                            <div className="flex gap-2">
+                              <button 
+                                onClick={() => updateOrderStatus(order.id, 'approved')}
+                                className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors"
+                              >
+                                قبول
+                              </button>
+                              <button 
+                                onClick={() => updateOrderStatus(order.id, 'rejected')}
+                                className="bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-700 transition-colors"
+                              >
+                                رفض
+                              </button>
+                              <button 
+                                onClick={() => updateOrderStatus(order.id, 'modification_requested')}
+                                className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors"
+                              >
+                                نواقص
+                              </button>
+                            </div>
+                          ) : (
+                            <OrderStatusBadge status={order.status} />
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
@@ -1039,6 +1102,8 @@ export default function App() {
           />
         )}
       </main>
+
+      <Footer siteSettings={siteSettings} />
 
       {/* Login/Register Modal */}
       <AnimatePresence>
@@ -1055,27 +1120,27 @@ export default function App() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative bg-white w-full max-w-2xl rounded-3xl shadow-2xl p-8 my-8"
+              className="relative bg-white w-full max-w-2xl rounded-3xl shadow-2xl p-4 md:p-8 my-8"
             >
-              <div className="flex justify-between items-center mb-6">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                 <div>
-                  <h2 className="text-2xl font-black text-slate-900">
+                  <h2 className="text-xl md:text-2xl font-black text-slate-900">
                     {authMode === 'login' ? 'مرحباً بك مجدداً' : 'إنشاء حساب جديد للتقسيط'}
                   </h2>
-                  <p className="text-slate-500">
+                  <p className="text-sm text-slate-500">
                     {authMode === 'login' ? 'سجل دخولك لمتابعة عمليات التقسيط الخاصة بك.' : 'قم بتعبئة البيانات التالية لتقديم طلب التقسيط.'}
                   </p>
                 </div>
-                <div className="flex bg-slate-100 p-1 rounded-xl">
+                <div className="flex bg-slate-100 p-1 rounded-xl w-full md:w-auto">
                   <button 
                     onClick={() => setAuthMode('login')}
-                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${authMode === 'login' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}
+                    className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-sm font-bold transition-all ${authMode === 'login' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}
                   >
                     دخول
                   </button>
                   <button 
                     onClick={() => setAuthMode('register')}
-                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${authMode === 'register' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}
+                    className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-sm font-bold transition-all ${authMode === 'register' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}
                   >
                     تسجيل
                   </button>
