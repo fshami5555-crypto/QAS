@@ -4,15 +4,36 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { neon } from "@netlify/neon";
 import fs from "fs";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Initialize database
-const sql = neon(process.env.NETLIFY_DATABASE_URL!);
+const dbUrl = process.env.NETLIFY_DATABASE_URL;
+if (!dbUrl) {
+  console.error("CRITICAL ERROR: NETLIFY_DATABASE_URL is not defined in environment variables.");
+} else {
+  const maskedUrl = dbUrl.replace(/:[^:@]+@/, ':****@');
+  console.log(`Using database URL: ${maskedUrl}`);
+}
+const sql = neon(dbUrl || "");
 
 async function initDb() {
+  console.log("Starting database initialization...");
+  if (!dbUrl) {
+    console.error("Skipping database initialization: NETLIFY_DATABASE_URL is missing.");
+    return;
+  }
   try {
+    // Test connection
+    console.log("Testing database connection...");
+    await sql`SELECT 1`;
+    console.log("Database connection successful.");
+
+    console.log("Creating tables if they don't exist...");
     await sql`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -110,7 +131,10 @@ async function initDb() {
     await sql`INSERT INTO settings (key, value) VALUES ('site_name', 'قسطني') ON CONFLICT (key) DO NOTHING`;
     await sql`INSERT INTO settings (key, value) VALUES ('site_logo', 'https://i.ibb.co/pjybBgHC/logo.png') ON CONFLICT (key) DO NOTHING`;
 
-    console.log("Database initialization and seeding complete.");
+    const userCount = await sql`SELECT COUNT(*) as count FROM users`;
+    const allUsers = await sql`SELECT email, role FROM users`;
+    console.log(`Database initialization and seeding complete. Total users: ${userCount[0].count}`);
+    console.log("Seeded users:", JSON.stringify(allUsers));
   } catch (error) {
     console.error("Database initialization failed:", error);
   }
