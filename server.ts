@@ -70,33 +70,53 @@ db.exec(`
   );
 `);
 
-// Seed some data if empty
-const userCount = db.prepare("SELECT COUNT(*) as count FROM users").get() as { count: number };
-if (userCount.count === 0) {
-  db.prepare("INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)").run("admin@qistati.com", "admin123", "Super Admin", "admin");
-  db.prepare("INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)").run("merchant@test.com", "pass123", "Electronics Store", "merchant");
-  db.prepare("INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)").run("financier@test.com", "pass123", "Quick Finance Co", "financier");
-  db.prepare("INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)").run("customer@test.com", "pass123", "Ahmad Ali", "customer");
-
-  const merchantId = 2;
-  db.prepare("INSERT INTO products (merchant_id, name, description, original_price, image_url) VALUES (?, ?, ?, ?, ?)").run(
-    merchantId,
-    "iPhone 15 Pro",
-    "Latest Apple iPhone with Titanium design.",
-    999,
-    "https://picsum.photos/seed/iphone/400/400"
-  );
-  db.prepare("INSERT INTO products (merchant_id, name, description, original_price, image_url) VALUES (?, ?, ?, ?, ?)").run(
-    merchantId,
-    "MacBook Air M2",
-    "Supercharged by M2 chip.",
-    1199,
-    "https://picsum.photos/seed/macbook/400/400"
-  );
-
-  db.prepare("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)").run("site_name", "قسطني");
-  db.prepare("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)").run("site_logo", "https://i.ibb.co/pjybBgHC/logo.png");
+// Migration: Ensure columns exist in users table
+const columns = db.prepare("PRAGMA table_info(users)").all() as any[];
+const columnNames = columns.map(c => c.name);
+if (!columnNames.includes("phone")) {
+  db.prepare("ALTER TABLE users ADD COLUMN phone TEXT").run();
 }
+if (!columnNames.includes("national_id")) {
+  db.prepare("ALTER TABLE users ADD COLUMN national_id TEXT").run();
+}
+
+// Seed some data
+const seedUsers = [
+  { email: "admin@qistati.com", password: "admin123", name: "Super Admin", role: "admin" },
+  { email: "merchant@test.com", password: "pass123", name: "Electronics Store", role: "merchant" },
+  { email: "financier@test.com", password: "pass123", name: "Quick Finance Co", role: "financier" },
+  { email: "customer@test.com", password: "pass123", name: "Ahmad Ali", role: "customer" }
+];
+
+for (const u of seedUsers) {
+  db.prepare("INSERT OR IGNORE INTO users (email, password, name, role) VALUES (?, ?, ?, ?)").run(u.email, u.password, u.name, u.role);
+}
+
+const productCount = db.prepare("SELECT COUNT(*) as count FROM products").get() as { count: number };
+if (productCount.count === 0) {
+  const merchant = db.prepare("SELECT id FROM users WHERE role = 'merchant' LIMIT 1").get() as any;
+  if (merchant) {
+    db.prepare("INSERT INTO products (merchant_id, name, description, original_price, image_url) VALUES (?, ?, ?, ?, ?)").run(
+      merchant.id,
+      "iPhone 15 Pro",
+      "Latest Apple iPhone with Titanium design.",
+      999,
+      "https://picsum.photos/seed/iphone/400/400"
+    );
+    db.prepare("INSERT INTO products (merchant_id, name, description, original_price, image_url) VALUES (?, ?, ?, ?, ?)").run(
+      merchant.id,
+      "MacBook Air M2",
+      "Supercharged by M2 chip.",
+      1199,
+      "https://picsum.photos/seed/macbook/400/400"
+    );
+  }
+}
+
+db.prepare("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)").run("site_name", "قسطني");
+db.prepare("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)").run("site_logo", "https://i.ibb.co/pjybBgHC/logo.png");
+
+console.log("Database seeded successfully.");
 
 async function startServer() {
   const app = express();
@@ -105,11 +125,14 @@ async function startServer() {
   // API Routes
   app.post("/api/login", (req, res) => {
     const { email, password } = req.body;
+    console.log(`Login attempt: ${email}`);
     const user = db.prepare("SELECT * FROM users WHERE email = ? AND password = ?").get(email, password) as any;
     if (user) {
-      const { password, ...userWithoutPassword } = user;
+      console.log(`Login success: ${email} (Role: ${user.role})`);
+      const { password: _, ...userWithoutPassword } = user;
       res.json(userWithoutPassword);
     } else {
+      console.log(`Login failed: ${email}`);
       res.status(401).json({ error: "Invalid credentials" });
     }
   });
