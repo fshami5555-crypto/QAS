@@ -63,6 +63,11 @@ db.exec(`
     file_path TEXT,
     FOREIGN KEY(order_id) REFERENCES orders(id)
   );
+
+  CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value TEXT
+  );
 `);
 
 // Seed some data if empty
@@ -88,6 +93,9 @@ if (userCount.count === 0) {
     1199,
     "https://picsum.photos/seed/macbook/400/400"
   );
+
+  db.prepare("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)").run("site_name", "قسطني");
+  db.prepare("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)").run("site_logo", "https://i.ibb.co/pjybBgHC/logo.png");
 }
 
 async function startServer() {
@@ -177,6 +185,36 @@ async function startServer() {
   app.patch("/api/orders/:id", (req, res) => {
     const { status } = req.body;
     db.prepare("UPDATE orders SET status = ? WHERE id = ?").run(status, req.params.id);
+    res.json({ success: true });
+  });
+
+  // Admin Settings
+  app.get("/api/settings", (req, res) => {
+    const settings = db.prepare("SELECT * FROM settings").all() as any[];
+    const settingsMap = settings.reduce((acc, curr) => ({ ...acc, [curr.key]: curr.value }), {});
+    res.json(settingsMap);
+  });
+
+  app.post("/api/settings", (req, res) => {
+    const { site_name, site_logo } = req.body;
+    if (site_name) db.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)").run("site_name", site_name);
+    if (site_logo) db.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)").run("site_logo", site_logo);
+    res.json({ success: true });
+  });
+
+  // Admin User Management
+  app.get("/api/users", (req, res) => {
+    const users = db.prepare("SELECT id, email, name, role, status FROM users").all();
+    res.json(users);
+  });
+
+  app.delete("/api/users/:id", (req, res) => {
+    db.prepare("DELETE FROM users WHERE id = ?").run(req.params.id);
+    res.json({ success: true });
+  });
+
+  app.delete("/api/products/:id", (req, res) => {
+    db.prepare("DELETE FROM products WHERE id = ?").run(req.params.id);
     res.json({ success: true });
   });
 

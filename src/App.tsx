@@ -13,7 +13,12 @@ import {
   FileText,
   ChevronRight,
   ShoppingCart,
-  Package
+  Package,
+  Settings,
+  Users,
+  Image as ImageIcon,
+  Trash2,
+  ShieldCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -56,7 +61,7 @@ const TOTAL_MARKUP = COMMISSION_RATE + INTEREST_RATE;
 
 // --- Components ---
 
-const Navbar = ({ user, onLogout, cartCount, onOpenCart, onLoginClick }: { user: User | null, onLogout: () => void, cartCount: number, onOpenCart: () => void, onLoginClick: () => void }) => (
+const Navbar = ({ user, onLogout, cartCount, onOpenCart, onLoginClick, siteSettings }: { user: User | null, onLogout: () => void, cartCount: number, onOpenCart: () => void, onLoginClick: () => void, siteSettings: { site_name: string, site_logo: string } }) => (
   <nav className="bg-white/90 backdrop-blur-md border-b border-slate-100 sticky top-0 z-50">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex justify-between h-20 items-center">
@@ -65,16 +70,15 @@ const Navbar = ({ user, onLogout, cartCount, onOpenCart, onLoginClick }: { user:
           className="flex items-center gap-3 group cursor-pointer"
         >
           <img 
-            src="https://i.ibb.co/pjybBgHC/logo.png" 
-            alt="Qistni Logo" 
+            src={siteSettings.site_logo} 
+            alt={siteSettings.site_name} 
             className="h-12 w-auto object-contain"
             onError={(e) => {
-              // Fallback if direct link fails
               e.currentTarget.src = "https://i.ibb.co/vX8Yyv0/qistni-placeholder.png";
             }}
           />
           <div className="flex flex-col leading-none">
-            <span className="text-2xl font-black text-blue-900 tracking-tight">قسطني</span>
+            <span className="text-2xl font-black text-blue-900 tracking-tight">{siteSettings.site_name}</span>
             <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Qistni</span>
           </div>
         </motion.div>
@@ -352,8 +356,246 @@ const HowItWorks = () => (
   </div>
 );
 
+const AdminDashboard = ({ products, onFetchProducts, siteSettings, onUpdateSettings }: { products: Product[], onFetchProducts: () => void, siteSettings: any, onUpdateSettings: (s: any) => void }) => {
+  const [users, setUsers] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'users' | 'products' | 'settings'>('users');
+  const [settingsForm, setSettingsForm] = useState(siteSettings);
+  const [newUserForm, setNewUserForm] = useState({ email: '', password: '', name: '', role: 'merchant' as Role });
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    const res = await fetch('/api/users');
+    const data = await res.json();
+    setUsers(data);
+  };
+
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const res = await fetch('/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newUserForm)
+    });
+    if (res.ok) {
+      setNewUserForm({ email: '', password: '', name: '', role: 'merchant' });
+      fetchUsers();
+    }
+  };
+
+  const handleDeleteUser = async (id: number) => {
+    if (!confirm('هل أنت متأكد من حذف هذا المستخدم؟')) return;
+    const res = await fetch(`/api/users/${id}`, { method: 'DELETE' });
+    if (res.ok) fetchUsers();
+  };
+
+  const handleDeleteProduct = async (id: number) => {
+    if (!confirm('هل أنت متأكد من حذف هذا المنتج؟')) return;
+    const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+    if (res.ok) onFetchProducts();
+  };
+
+  const handleUpdateSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const res = await fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(settingsForm)
+    });
+    if (res.ok) onUpdateSettings(settingsForm);
+  };
+
+  return (
+    <div className="space-y-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <h2 className="text-3xl font-black text-slate-900">لوحة تحكم المدير</h2>
+        <div className="flex bg-slate-100 p-1 rounded-2xl">
+          <button 
+            onClick={() => setActiveTab('users')}
+            className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'users' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}
+          >
+            <Users size={18} />
+            المستخدمين
+          </button>
+          <button 
+            onClick={() => setActiveTab('products')}
+            className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'products' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}
+          >
+            <Package size={18} />
+            المنتجات
+          </button>
+          <button 
+            onClick={() => setActiveTab('settings')}
+            className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'settings' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}
+          >
+            <Settings size={18} />
+            الإعدادات
+          </button>
+        </div>
+      </div>
+
+      {activeTab === 'users' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 bg-white rounded-[2rem] border border-slate-200 overflow-hidden">
+            <table className="w-full text-right">
+              <thead className="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th className="px-6 py-4 text-sm font-bold text-slate-600">الاسم</th>
+                  <th className="px-6 py-4 text-sm font-bold text-slate-600">الدور</th>
+                  <th className="px-6 py-4 text-sm font-bold text-slate-600">الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {users.map(u => (
+                  <tr key={u.id}>
+                    <td className="px-6 py-4">
+                      <div className="font-bold text-slate-900">{u.name}</div>
+                      <div className="text-xs text-slate-500">{u.email}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${
+                        u.role === 'admin' ? 'bg-rose-100 text-rose-700' :
+                        u.role === 'merchant' ? 'bg-blue-100 text-blue-700' :
+                        u.role === 'financier' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'
+                      }`}>
+                        {u.role}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      {u.role !== 'admin' && (
+                        <button onClick={() => handleDeleteUser(u.id)} className="text-rose-600 hover:bg-rose-50 p-2 rounded-lg transition-colors">
+                          <Trash2 size={18} />
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="bg-white p-8 rounded-[2rem] border border-slate-200 h-fit">
+            <h3 className="text-xl font-black text-slate-900 mb-6">إضافة مستخدم جديد</h3>
+            <form onSubmit={handleCreateUser} className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1">الاسم</label>
+                <input 
+                  type="text" required
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                  value={newUserForm.name}
+                  onChange={e => setNewUserForm({...newUserForm, name: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1">البريد الإلكتروني</label>
+                <input 
+                  type="email" required
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                  value={newUserForm.email}
+                  onChange={e => setNewUserForm({...newUserForm, email: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1">كلمة المرور</label>
+                <input 
+                  type="password" required
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                  value={newUserForm.password}
+                  onChange={e => setNewUserForm({...newUserForm, password: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1">الدور</label>
+                <select 
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                  value={newUserForm.role}
+                  onChange={e => setNewUserForm({...newUserForm, role: e.target.value as Role})}
+                >
+                  <option value="merchant">تاجر</option>
+                  <option value="financier">شركة تمويل</option>
+                  <option value="admin">مدير</option>
+                </select>
+              </div>
+              <button className="w-full bg-blue-600 text-white py-4 rounded-xl font-black hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20">
+                إنشاء الحساب
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'products' && (
+        <div className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden">
+          <table className="w-full text-right">
+            <thead className="bg-slate-50 border-b border-slate-200">
+              <tr>
+                <th className="px-6 py-4 text-sm font-bold text-slate-600">المنتج</th>
+                <th className="px-6 py-4 text-sm font-bold text-slate-600">السعر</th>
+                <th className="px-6 py-4 text-sm font-bold text-slate-600">الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {products.map(p => (
+                <tr key={p.id}>
+                  <td className="px-6 py-4 flex items-center gap-4">
+                    <img src={p.image_url} className="w-12 h-12 rounded-lg object-cover" referrerPolicy="no-referrer" />
+                    <span className="font-bold text-slate-900">{p.name}</span>
+                  </td>
+                  <td className="px-6 py-4 text-sm font-bold text-slate-900">{p.original_price} د.أ</td>
+                  <td className="px-6 py-4">
+                    <button onClick={() => handleDeleteProduct(p.id)} className="text-rose-600 hover:bg-rose-50 p-2 rounded-lg transition-colors">
+                      <Trash2 size={18} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {activeTab === 'settings' && (
+        <div className="bg-white p-10 rounded-[3rem] border border-slate-200 max-w-2xl mx-auto shadow-xl">
+          <h3 className="text-2xl font-black text-slate-900 mb-8 flex items-center gap-3">
+            <ShieldCheck className="text-blue-600" size={28} />
+            إعدادات المنصة العامة
+          </h3>
+          <form onSubmit={handleUpdateSettings} className="space-y-6">
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-2">اسم الموقع</label>
+              <input 
+                type="text" required
+                className="w-full px-5 py-4 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-lg"
+                value={settingsForm.site_name}
+                onChange={e => setSettingsForm({...settingsForm, site_name: e.target.value})}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-2">رابط الشعار (Logo URL)</label>
+              <input 
+                type="text" required
+                className="w-full px-5 py-4 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-lg"
+                value={settingsForm.site_logo}
+                onChange={e => setSettingsForm({...settingsForm, site_logo: e.target.value})}
+              />
+              <div className="mt-4 p-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200 flex items-center justify-center">
+                <img src={settingsForm.site_logo} alt="Preview" className="h-16 object-contain" />
+              </div>
+            </div>
+            <button className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xl hover:bg-blue-700 transition-all shadow-2xl shadow-blue-600/30">
+              حفظ التغييرات
+            </button>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
+  const [siteSettings, setSiteSettings] = useState({ site_name: 'قسطني', site_logo: 'https://i.ibb.co/pjybBgHC/logo.png' });
   const [view, setView] = useState<'home' | 'orders' | 'merchant' | 'financier' | 'admin'>('home');
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -378,7 +620,14 @@ export default function App() {
 
   useEffect(() => {
     fetchProducts();
+    fetchSettings();
   }, []);
+
+  const fetchSettings = async () => {
+    const res = await fetch('/api/settings');
+    const data = await res.json();
+    if (data.site_name) setSiteSettings(data);
+  };
 
   useEffect(() => {
     if (user) {
@@ -546,6 +795,7 @@ export default function App() {
         cartCount={cart.length}
         onOpenCart={() => setIsCartOpen(true)}
         onLoginClick={() => setIsLoginModalOpen(true)}
+        siteSettings={siteSettings}
       />
 
       {/* Background Decorations */}
@@ -568,6 +818,24 @@ export default function App() {
               className={`pb-4 px-2 font-bold text-sm transition-all ${view === 'orders' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
             >
               طلباتي
+            </button>
+          </div>
+        )}
+
+        {/* Navigation Tabs for Admin */}
+        {user?.role === 'admin' && (
+          <div className="flex gap-4 mb-8 border-b border-slate-200">
+            <button 
+              onClick={() => setView('home')}
+              className={`pb-4 px-2 font-bold text-sm transition-all ${view === 'home' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
+            >
+              المتجر (معاينة)
+            </button>
+            <button 
+              onClick={() => setView('admin')}
+              className={`pb-4 px-2 font-bold text-sm transition-all ${view === 'admin' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
+            >
+              لوحة التحكم
             </button>
           </div>
         )}
@@ -759,6 +1027,16 @@ export default function App() {
               </table>
             </div>
           </div>
+        )}
+
+        {/* Admin Dashboard View */}
+        {view === 'admin' && (
+          <AdminDashboard 
+            products={products} 
+            onFetchProducts={fetchProducts} 
+            siteSettings={siteSettings}
+            onUpdateSettings={setSiteSettings}
+          />
         )}
       </main>
 
